@@ -10,7 +10,7 @@ Steps:
 """
 
 from numpy import Inf, zeros
-from ..flowshop.flow_shop_intro.gantt_fs import crear_y_mostrar_gantt_fs
+from gantt_fs import crear_y_mostrar_gantt_fs
 
 
 
@@ -42,9 +42,9 @@ class FlowShop:
         self.n = len(self.duration[0])  # number of tasks
         self.time_start = zeros((self.m, self.n), dtype=int)    # matrix with operation start times
         
-        cmax = Inf                      # makespan
-        pi = [3, 1, 0, 2]               # permutation
-        self.solution = (pi, cmax)      # solution is a tuple of permutation and its makespan
+        # self.cmax = Inf                      # makespan
+        # self.pi = [3, 1, 0, 2]               # permutation
+        # self.solution = (pi, cmax)      # solution is a tuple of permutation and its makespan
         
         print(f"FlowShop object created")
 
@@ -52,51 +52,43 @@ class FlowShop:
         return f"My operations: {self.duration}"
     
     def calculate_makespan(self, permutation) -> int:
-        self.permutation = permutation
 
         for m in range(self.m):
             for n in range(self.n):
-
                 # technological ancestor finish - finish time of an operation that's a tech predecessor
                 # poprzednik technologiczny - operacja z tego zadania, ale poprzedniej maszyny
                 taf = self.technological_ancestor_finish(permutation, m, n)
                 # order ancestor finish - finish time of an operation that's an oredr predecessor
                 # poprzednik kolejnościowy - inne zadanie z tej samej maszyny
-                oaf = order_ancestor_finish()
+                oaf = self.order_ancestor_finish(permutation, m, n)
+                # operation starts on later of these two
+                self.time_start[m][permutation[n]] = max(taf, oaf)
 
-                if m == 0 and n == 0:
-                    ancestor_tech_finish = 0
-                    ancestor_order_finish = 0
-                elif m != 0 and n == 0:
-                    ancestor_tech_finish = self.time_start[m-1][n] + self.duration[m-1][n]
-                    ancestor_order_finish = 0
-                elif m == 0 and n != 0:
-                    ancestor_tech_finish = 0
-                    ancestor_order_finish = self.time_start[m][n-1] + self.duration[m][n-1]
-                elif m != 0 and n != 0:
+        return self.time_start[-1][permutation[-1]] + self.duration[-1][permutation[-1]]
 
-                    ancestor_tech_finish = self.time_start[m-1][n] + self.duration[m-1][n]
-                    ancestor_order_finish = self.time_start[m][n-1] + self.duration[m][n-1]
-
-                self.time_start[m][n] = max(ancestor_tech_finish, ancestor_order_finish)
-
-        return 100
-
-    def technological_ancestor_finish(self, m, n):
+    def technological_ancestor_finish(self, permutation, m, n) -> int:
+        """Calculates finish time of an operation, that's a technological predecessor
+        to operation[m][n]"""
         if m == 0 and n == 0:
-            return 0 + self.duration[m][n]
+            return 0
         elif m != 0 and n == 0:
-            return self.time_start[]
-            ancestor_tech_finish = self.time_start[m-1][n] + self.duration[m-1][n]
-            ancestor_order_finish = 0
+            return self.time_start[m-1][permutation[n]] + self.duration[m-1][permutation[n]]
         elif m == 0 and n != 0:
-            ancestor_tech_finish = 0
-            ancestor_order_finish = self.time_start[m][n-1] + self.duration[m][n-1]
+            return 0
         elif m != 0 and n != 0:
-            ancestor_tech_finish = self.time_start[m-1][n] + self.duration[m-1][n]
-            ancestor_order_finish = self.time_start[m][n-1] + self.duration[m][n-1]
+            return self.time_start[m-1][permutation[n]] + self.duration[m-1][permutation[n]]
 
-        return taf
+    def order_ancestor_finish(self, permutation, m, n) -> int:
+        """Calculates finish time of an operation, that's an order predecessor
+        to operation[m][n]"""
+        if m == 0 and n == 0:
+            return 0
+        elif m != 0 and n == 0:
+            return 0
+        elif m == 0 and n != 0:
+            return self.time_start[m][permutation[n-1]] + self.duration[m][permutation[n-1]]
+        elif m != 0 and n != 0:
+            return self.time_start[m][permutation[n-1]] + self.duration[m][permutation[n-1]]
 
 
     def show_gantt(self):
@@ -116,6 +108,8 @@ class FlowShop:
 def main():
     fs = FlowShop()
     print(f"Hello world! {fs}")
+    print(f"{fs.calculate_makespan([3, 0, 1, 2])=}")
+    print(fs.time_start)
     i = 2
 
 if __name__ == '__main__':
