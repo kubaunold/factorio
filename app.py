@@ -11,7 +11,7 @@ Steps:
 
 from numpy import Inf, zeros
 from gantt_fs import crear_y_mostrar_gantt_fs
-
+from time import sleep
 
 
 class Operation:
@@ -115,17 +115,21 @@ class FlowShop:
 def main():
     fs = FlowShop()
     permutation = [0, 1, 2, 3]
-    permutation = [0, 1, 3, 2]
-    makespan = fs.calculate_makespan(permutation)
-    schedule = fs.get_schedule()
+    permutation = [3, 1, 0, 2]
+    import itertools
+    all_permms = list(itertools.permutations([0, 1, 2, 3]))
     
-    machine_names = ["M0", "M1", "M2"]
-    job_names = ["T0", "T1", "T2", "T3"]
+    for permutation in all_permms:
+        makespan = fs.calculate_makespan(permutation)
+        schedule = fs.get_schedule()
+        
+        machine_names = ["M0", "M1", "M2"]
+        job_names = ["T0", "T1", "T2", "T3"]
 
-    print(f"{machine_names=}")
-    print(f"{job_names=}")
-    print(f"{schedule=}")
-    crear_y_mostrar_gantt_fs(schedule, machine_names, job_names)
-    
+        print(f"{machine_names=}")
+        print(f"{job_names=}")
+        print(f"{schedule=}")
+        # crear_y_mostrar_gantt_fs(schedule, machine_names, job_names)
+
 if __name__ == '__main__':
     main()
