@@ -90,27 +90,42 @@ class FlowShop:
         elif m != 0 and n != 0:
             return self.time_start[m][permutation[n-1]] + self.duration[m][permutation[n-1]]
 
-
-    def show_gantt(self):
-        
+    def get_schedule(self):
+        """Creates schedule - dict with task duration and start times"""
         def add_subtask(schedule, t0, d, i_maq, i_tarea):
             # Dict of a subtask
-            subtask = {'t0': t0, 'd': d, 'i_maq': i_maq, 'i_tarea': i_tarea}
+            subtask = {'t0': t0, 'd': d, 'i_machine': i_maq, 'i_task': i_tarea}
 
             # Add to schedule
             schedule.append(subtask)
         
         schedule = []
 
+        for m in range(self.m):
+            for n in range(self.n):
+                add_subtask(schedule, self.time_start[m][n], self.duration[m][n], m, n)
+
+        return schedule
+
+
+
 
 
 
 def main():
     fs = FlowShop()
-    print(f"Hello world! {fs}")
-    print(f"{fs.calculate_makespan([3, 0, 1, 2])=}")
-    print(fs.time_start)
-    i = 2
+    permutation = [0, 1, 2, 3]
+    permutation = [0, 1, 3, 2]
+    makespan = fs.calculate_makespan(permutation)
+    schedule = fs.get_schedule()
+    
+    machine_names = ["M0", "M1", "M2"]
+    job_names = ["T0", "T1", "T2", "T3"]
 
+    print(f"{machine_names=}")
+    print(f"{job_names=}")
+    print(f"{schedule=}")
+    crear_y_mostrar_gantt_fs(schedule, machine_names, job_names)
+    
 if __name__ == '__main__':
     main()

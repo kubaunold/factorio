@@ -96,6 +96,7 @@ def crear_gantt_fs(schedule, n_maqs, n_tareas):
     # Horizonte temporal:
     ultima_subtask = schedule[-1]
     ht = ultima_subtask["t0"] + ultima_subtask["d"]
+    ht = 100
 
     # Creamos el diagrama de gantt:
     diagrama = inicializar_gantt(n_maqs, ht)
