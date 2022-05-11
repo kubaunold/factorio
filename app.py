@@ -9,6 +9,7 @@ Steps:
 4) Display gantt chart
 """
 
+from cmath import inf
 from numpy import Inf, zeros
 from gantt_fs import crear_y_mostrar_gantt_fs
 from time import sleep
@@ -119,17 +120,28 @@ def main():
     import itertools
     all_permms = list(itertools.permutations([0, 1, 2, 3]))
     
+
+    best_makespan = inf
+    best_permutation = []
+    best_schedule = []
+    
     for permutation in all_permms:
         makespan = fs.calculate_makespan(permutation)
         schedule = fs.get_schedule()
-        
-        machine_names = ["M0", "M1", "M2"]
-        job_names = ["T0", "T1", "T2", "T3"]
 
-        print(f"{machine_names=}")
-        print(f"{job_names=}")
         print(f"{schedule=}")
+
+        if makespan < best_makespan:
+            best_makespan = makespan
+            best_permutation = permutation
+            best_schedule = schedule
+        
         # crear_y_mostrar_gantt_fs(schedule, machine_names, job_names)
 
+    machine_names = ["M0", "M1", "M2"]
+    job_names = ["T0", "T1", "T2", "T3"]
+    print(f"{best_makespan=}")
+    print(f"{best_permutation=}")
+    crear_y_mostrar_gantt_fs(schedule, machine_names, job_names)
 if __name__ == '__main__':
     main()
