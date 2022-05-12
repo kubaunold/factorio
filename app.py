@@ -13,7 +13,7 @@ from cmath import inf
 from numpy import Inf, zeros
 from gantt_fs import crear_y_mostrar_gantt_fs
 from time import sleep
-
+from util import read_operations
 
 class Operation:
     """Most atomic cell of a FlowShop problem"""
@@ -32,15 +32,25 @@ class Operation:
 class FlowShop:
     """Object for solving FlowShop problem"""
     
-    def __init__(self) -> None:
-        self.duration = [
-            [4, 4, 2,  3],
-            [3, 1, 1,  2],
-            [4, 1,  2,  1],
-        ]
+    def __init__(self, m, n, operation_times) -> None:
+        # self.duration = [
+        #     [4, 4, 2, 3],
+        #     [3, 1, 1, 2],
+        #     [4, 1, 2, 1],
+        # ]
+        self.duration = operation_times
 
-        self.m = len(self.duration)     # number of machines
-        self.n = len(self.duration[0])  # number of tasks
+        if(m == len(self.duration)):
+            self.m = len(self.duration)     # number of machines
+        else:
+            raise NameError("Number of machines does not match")
+
+        if(n == len(self.duration[0])):
+            self.n = len(self.duration[0])     # number of machines
+        else:
+            raise NameError("Number of tasks does not match")
+
+
         self.time_start = zeros((self.m, self.n), dtype=int)    # matrix with operation start times
         
         # self.cmax = Inf                      # makespan
@@ -114,11 +124,13 @@ class FlowShop:
 
 
 def main():
-    fs = FlowShop()
-    permutation = [0, 1, 2, 3]
-    permutation = [3, 1, 0, 2]
+    m, n = 5, 7
+
+    operation_times = read_operations(m, n)
+    fs = FlowShop(m=m, n=n, operation_times=operation_times)
+    
     import itertools
-    all_permms = list(itertools.permutations([0, 1, 2, 3]))
+    all_permms = list(itertools.permutations(list(i for i in range(n))))
     
 
     best_makespan = inf
@@ -138,8 +150,8 @@ def main():
         
         # crear_y_mostrar_gantt_fs(schedule, machine_names, job_names)
 
-    machine_names = ["M0", "M1", "M2"]
-    job_names = ["T0", "T1", "T2", "T3"]
+    machine_names = ["M0", "M1", "M2", "M3", "M4"]
+    job_names = ["T0", "T1", "T2", "T3", "T4", "T5", "T6"]
     print(f"{best_makespan=}")
     print(f"{best_permutation=}")
     crear_y_mostrar_gantt_fs(schedule, machine_names, job_names)

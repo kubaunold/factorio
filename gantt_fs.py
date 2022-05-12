@@ -30,8 +30,8 @@ def inicializar_gantt(maquinas, ht):
     }
 
     # Etiquetas de los ejes:
-    gantt.set_xlabel("Tiempo")
-    gantt.set_ylabel("Máquinas")
+    gantt.set_xlabel("Time")
+    gantt.set_ylabel("Machines")
 
     # Límites de los ejes:
     gantt.set_xlim(0, ht)
