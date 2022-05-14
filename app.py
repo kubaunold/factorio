@@ -136,6 +136,7 @@ def main():
     best_makespan = inf
     best_permutation = []
     best_schedule = []
+    makespan_list = []
     
     for permutation in all_permms:
         makespan = fs.calculate_makespan(permutation)
@@ -147,6 +148,7 @@ def main():
             best_makespan = makespan
             best_permutation = permutation
             best_schedule = schedule
+            makespan_list.append(makespan)
         
         # crear_y_mostrar_gantt_fs(schedule, machine_names, job_names)
 
@@ -155,5 +157,8 @@ def main():
     print(f"{best_makespan=}")
     print(f"{best_permutation=}")
     crear_y_mostrar_gantt_fs(schedule, machine_names, job_names)
+    print(f"{makespan_list=}")
+
+
 if __name__ == '__main__':
     main()
