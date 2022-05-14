@@ -125,7 +125,6 @@ class FlowShop:
 
 def main():
     m, n = 5, 7
-
     operation_times = read_operations(m, n)
     fs = FlowShop(m=m, n=n, operation_times=operation_times)
     
