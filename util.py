@@ -8,3 +8,6 @@ def read_operations(m, n):
     return durations
 
 # print(read_operations(3, 4))
+
+
+def silnia(n): return n*silnia(n-1) if n > 1 else 1

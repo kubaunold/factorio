@@ -1,7 +1,7 @@
 import time
 from numpy.random import permutation
 from app import FlowShop
-from util import read_operations
+from util import read_operations, silnia
 
 
 def calculateObj(sol):
@@ -78,13 +78,27 @@ class GeneticFlowShop(FlowShop):
 
     def __get_initial_population(self):
         """Creating the initial population (n_pop distinct chromosomes)"""
+
         pop = []
+        allow_duplicate = False
+
+        if self.n_pop > silnia(self.m):
+            print("Warning! Size of the population exceeds number of possible permutations.py. There will be duplicate permutations.")
+            allow_duplicate = True
+
         for i in range(self.n_pop):
+            """Select specimen one by one"""
             p = list(permutation(self.n))
-            while p in pop:
+            if allow_duplicate:
                 p = list(permutation(self.n))
-            pop.append(p)
+            else:
+                while p in pop:
+                    p = list(permutation(self.n))
             print(f"num_citizens={len(pop)}")
+
+            pop.append(p)
+
+
         return pop
 
 
