@@ -1,5 +1,6 @@
+import random
 import time
-from numpy.random import permutation
+from numpy.random import permutation, choice
 from app import FlowShop
 from util import read_operations, silnia
 
@@ -74,6 +75,8 @@ class GeneticFlowShop(FlowShop):
         self.n_iter = n_iter
         
         self.population = self.__get_initial_population()
+        self.parents = []
+        self.children = []
         # print(f"{self.population=}")
 
     def __get_initial_population(self):
@@ -101,33 +104,78 @@ class GeneticFlowShop(FlowShop):
 
         return pop
 
+    def __selection(self) -> None:
+        """Select parents based on given population
+            Updates self.parents list"""
+
+        # purge parents
+        self.parents = []
+
+        # create list of tuples such as: (makespan, index)
+        pop_w_makespan = []
+        for i in range(self.n_pop):
+            pop_w_makespan.append([self.calculate_makespan(self.population[i]), i]) 
+
+        print(pop_w_makespan)
+
+        # sort by ascending value makespan (the fittest is at the beginning)
+        pop_w_makespan.sort()
+        print(f"Pop_w_makespan after sort= {pop_w_makespan}")
+
+
+        # create distribution values
+        distr_ind = []
+        distr = []
+        for i in range(self.n_pop):
+            distr_ind.append(pop_w_makespan[i][1])
+            distr.append((2*(i+1)) / (self.n_pop * (self.n_pop+1)))
+
+        print(f"{distr_ind = }")
+        print(f"{distr = }")
+
+        # select parents (for each new child there are 2 parents)
+        for i in range(self.n_pop):
+            self.parents.append(list(choice(distr_ind, 2, p=distr)))
+        print(f"{self.parents = }")
+    
+    def __crossover(self) -> None:
+        """Apply crossover
+            Updates self.children"""
+        for p in self.parents:
+            r = random.random()
+            if r < self.p_cross:
+                
+                
+                self.children.append(self.population[p[0]])
+                # here some crossing needs to be done
+                pass
+                # self.population.append(crossover([population[p[0]], population[p[1]]]))
+            else:
+                if r < 0.5:
+                    self.children.append(self.population[p[0]])
+                else:
+                    self.children.append(self.population[p[1]])
+        
+
+        print(self.children)
 
 
     def run(self):
         """Run the algorithm for 'n_iter' times"""
         for i in range(self.n_iter):
-
-            # print fitness value for each citizen
-            for p in self.population:
-                fitness = self.calculate_makespan(p)
-                print(f"{p=}   {fitness=}")
-
-            return
             
             # Selecting parents
-            # parents = selection(population)
-            # childs = []
+            self.__selection()
             
-        #     # Apply crossover
-        #     for p in parents:
-        #         r = random.random()
-        #         if r < Pc:
-        #             childs.append(crossover([population[p[0]], population[p[1]]]))
-        #         else:
-        #             if r < 0.5:
-        #                 childs.append(population[p[0]])
-        #             else:
-        #                 childs.append(population[p[1]])
+            # apply crossover
+            self.__crossover()
+
+
+        
+        
+        return
+
+
             
         #     # Apply mutation 
         #     for c in childs:
@@ -149,13 +197,13 @@ class GeneticFlowShop(FlowShop):
 
 if __name__ == "__main__":
     # Number of population
-    n_pop = 6000
+    n_pop = 4
     # Probability of crossover
     p_cross = 1.0
     # Probability of mutation
     p_mut = 1.0
     # Stopping number for generation
-    n_iter = 10000
+    n_iter = 1
 
 
     m, n = 5, 7
