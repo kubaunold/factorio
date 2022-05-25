@@ -3,7 +3,7 @@ import time
 from numpy.random import permutation, choice
 from app import FlowShop
 from util import read_operations, silnia
-
+import mutation
 
 def calculateObj(sol):
     qTime = queue.PriorityQueue()
@@ -159,6 +159,14 @@ class GeneticFlowShop(FlowShop):
 
         print(self.children)
 
+    def __mutation(self):
+        print("Starting mutation.")
+        for c in self.children:
+            r = random.random()
+            if r < self.p_mut:
+                c = mutation.mutation(c)
+
+        print("Mutation finished.")
 
     def run(self):
         """Run the algorithm for 'n_iter' times"""
@@ -170,26 +178,15 @@ class GeneticFlowShop(FlowShop):
             # apply crossover
             self.__crossover()
 
+            # apply mutation
+            self.__mutation()
 
-        
+            # elitist update - bring few best from the previous iteration
+            # TODO population = elitistUpdate(population, childs)
+
+            print(f"makespan: {self.calculate_makespan(self.children[0])}")
         
         return
-
-
-            
-        #     # Apply mutation 
-        #     for c in childs:
-        #         r = random.random()
-        #         if r < Pm:
-        #             c = mutation(c)
-
-        #     # Update the population
-        #     population = elitistUpdate(population, childs)
-            
-        #     #print(population)
-        #     #print(findBestSolution(population))
-
-
 
 
 
@@ -203,7 +200,7 @@ if __name__ == "__main__":
     # Probability of mutation
     p_mut = 1.0
     # Stopping number for generation
-    n_iter = 1
+    n_iter = 7
 
 
     m, n = 5, 7
