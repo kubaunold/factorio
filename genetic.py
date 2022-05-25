@@ -7,7 +7,7 @@ from numpy.random import permutation, choice
 from app import FlowShop
 from util import read_operations, silnia
 import mutation, crossover
-import logging
+from base_logger import logger as logging
 
 def calculateObj(sol):
     qTime = queue.PriorityQueue()
@@ -228,10 +228,7 @@ class GeneticFlowShop(FlowShop):
 if __name__ == "__main__":
 
 
-    logging.basicConfig(filename="log.log",
-                        level=logging.INFO,
-                        filemode='w',
-                        format='%(asctime)s | %(levelname)s | %(message)s')
+    
     
     logging.info("I'm an informational message.")
     logging.debug("I'm a message for debugging purposes.")

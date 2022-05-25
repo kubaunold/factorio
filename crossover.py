@@ -1,6 +1,6 @@
 import itertools
 import numpy as np
-from genetic import logging
+from base_logger import logger
 
 def ordered_crossover(p1, p2) -> list:
     """ Ordered crossover 
@@ -15,11 +15,17 @@ def ordered_crossover(p1, p2) -> list:
 
     child_part1 = []
     child_part2 = []
-    # assembly part from child 1
+    # assembly first part of a child (from parent1)
     for i in range(start_gene, end_gene):
         child_part1.append(p1[i])
 
-    return one
+    # assembly remaining part of a child (from parent2)
+    child_part2 = [item for item in p2 if item not in child_part1]
+
+    child = child_part1 + child_part2
+
+
+    return child
 
 # def two_point_crossover(one, two) -> list:
 #     """ Two-point crossover """
@@ -50,6 +56,6 @@ def ordered_crossover(p1, p2) -> list:
 
 if __name__=='__main__':
     p1 = [5, 4, 0, 3, 2, 1, 6]
-    p2 = [2, 4, 2, 3, 6, 5, 0]
+    p2 = [2, 4, 1, 3, 6, 5, 0]
 
-    orde
+    print(ordered_crossover(p1, p2))
