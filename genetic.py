@@ -1,9 +1,13 @@
+from distutils.debug import DEBUG
 import random
+from re import I
 import time
+from numpy import Inf
 from numpy.random import permutation, choice
 from app import FlowShop
 from util import read_operations, silnia
-import mutation
+import mutation, crossover
+import logging
 
 def calculateObj(sol):
     qTime = queue.PriorityQueue()
@@ -75,40 +79,39 @@ class GeneticFlowShop(FlowShop):
         self.n_iter = n_iter
         
         self.population = self.__get_initial_population()
-        self.parents = []
-        self.children = []
-        # print(f"{self.population=}")
 
-    def __get_initial_population(self):
+        # should I add here the following lines?
+        # self.parents = []
+        # self.children = []
+
+    def __get_initial_population(self) -> list:
         """Creating the initial population (n_pop distinct chromosomes)"""
 
         pop = []
         allow_duplicate = False
 
         if self.n_pop > silnia(self.m):
-            print("Warning! Size of the population exceeds number of possible permutations.py. There will be duplicate permutations.")
+            logging.warning("Warning! Size of the population exceeds number of possible permutations.py. There will be duplicate permutations.")
             allow_duplicate = True
 
+        # Select specimen one by one
         for i in range(self.n_pop):
-            """Select specimen one by one"""
             p = list(permutation(self.n))
             if allow_duplicate:
                 p = list(permutation(self.n))
             else:
                 while p in pop:
                     p = list(permutation(self.n))
-            print(f"num_citizens={len(pop)}")
 
             pop.append(p)
-
 
         return pop
 
     def __selection(self) -> None:
-        """Select parents based on given population
-            Updates self.parents list"""
-
-        # purge parents
+        """ Select parents based on given population.
+            Creates self.parents list. """
+        
+        # Create and purge parents for future incoming offspring
         self.parents = []
 
         # create list of tuples such as: (makespan, index)
@@ -116,11 +119,9 @@ class GeneticFlowShop(FlowShop):
         for i in range(self.n_pop):
             pop_w_makespan.append([self.calculate_makespan(self.population[i]), i]) 
 
-        print(pop_w_makespan)
 
         # sort by ascending value makespan (the fittest is at the beginning)
         pop_w_makespan.sort()
-        print(f"Pop_w_makespan after sort= {pop_w_makespan}")
 
 
         # create distribution values
@@ -130,26 +131,21 @@ class GeneticFlowShop(FlowShop):
             distr_ind.append(pop_w_makespan[i][1])
             distr.append((2*(i+1)) / (self.n_pop * (self.n_pop+1)))
 
-        print(f"{distr_ind = }")
-        print(f"{distr = }")
 
         # select parents (for each new child there are 2 parents)
         for i in range(self.n_pop):
             self.parents.append(list(choice(distr_ind, 2, p=distr)))
-        print(f"{self.parents = }")
     
     def __crossover(self) -> None:
-        """Apply crossover
-            Updates self.children"""
+        """ Apply crossover.
+            Create and fill out self.children list """
+
+        self.children = []
+
         for p in self.parents:
             r = random.random()
             if r < self.p_cross:
-                
-                
-                self.children.append(self.population[p[0]])
-                # here some crossing needs to be done
-                pass
-                # self.population.append(crossover([population[p[0]], population[p[1]]]))
+                self.children.append(crossover.ordered_crossover(self.population[p[0]], self.population[p[1]])) 
             else:
                 if r < 0.5:
                     self.children.append(self.population[p[0]])
@@ -157,34 +153,71 @@ class GeneticFlowShop(FlowShop):
                     self.children.append(self.population[p[1]])
         
 
-        print(self.children)
-
     def __mutation(self):
-        print("Starting mutation.")
+        """ Apply mutation.
+            Affects self.children list"""
+
+        logging.debug("Starting mutation.")
         for c in self.children:
             r = random.random()
             if r < self.p_mut:
                 c = mutation.mutation(c)
+        logging.debug("Mutation finished.")
 
-        print("Mutation finished.")
+        
+    def __elitist_update(self):
+        """ Add best specimen from previous population (self.population)
+            instead of a random one from the children (self.children)
+            Affects self.children list """
+
+        logging.debug("Starting elitist update.")
+        
+        # initialize
+        best_makespan, best_parent_idx = Inf, -1
+        
+        # Get best specimen from old population
+        for i, p in enumerate(self.population):
+            temp_makespan = self.calculate_makespan(p)
+            if temp_makespan < best_makespan:
+                best_parent_idx = i
+                best_makespan = temp_makespan
+
+        # print out the best specimen
+        logging.info(f"Makespan of the best specimen from the current population: {best_makespan}")
+
+        # Substitue random child with best parent
+        random_idx = random.randint(0, self.n_pop - 1)
+        self.children[random_idx] = self.population[best_parent_idx]
+
+        logging.debug("Elitist update finished.")
+
+    def __grow_children(self):
+        """ Kill parents (self.population) and make children the new parents
+            Affects self.population list """
+
+        self.population = self.children
 
     def run(self):
         """Run the algorithm for 'n_iter' times"""
         for i in range(self.n_iter):
             
-            # Selecting parents
+            # Selecting parents for breeding
             self.__selection()
             
-            # apply crossover
+            # Create offspring from parents by crossover
             self.__crossover()
 
-            # apply mutation
+            # Mutate offspring
             self.__mutation()
 
             # elitist update - bring few best from the previous iteration
-            # TODO population = elitistUpdate(population, childs)
+            self.__elitist_update()
 
-            print(f"makespan: {self.calculate_makespan(self.children[0])}")
+            logging.info(f"Iter[{i}]: makespan of 1st child: {self.calculate_makespan(self.children[0])}")
+ 
+            # kill parents (pupulation). Make children the new parents (population).
+            self.__grow_children()
+
         
         return
 
@@ -193,6 +226,25 @@ class GeneticFlowShop(FlowShop):
 
 
 if __name__ == "__main__":
+
+
+    logging.basicConfig(filename="log.log",
+                        level=logging.INFO,
+                        filemode='w',
+                        format='%(asctime)s | %(levelname)s | %(message)s')
+    
+    logging.info("I'm an informational message.")
+    logging.debug("I'm a message for debugging purposes.")
+    logging.warning("I'm a warning. Beware!")
+
+    """
+    ● DEBUG: You should use this level for debugging purposes in development.
+    ● INFO: You should use this level when something interesting—but expected—happens (e.g., a user starts a new project in a project management application).
+    ● WARNING: You should use this level when something unexpected or unusual happens. It’s not an error, but you should pay attention to it.
+    ● ERROR: This level is for things that go wrong but are usually recoverable (e.g., internal exceptions you can handle or APIs returning error results).
+    ● CRITICAL: You should use this level in a doomsday scenario. The application is unusable. At this level, someone should be woken up at 2 a.m.
+    """
+
     # Number of population
     n_pop = 4
     # Probability of crossover
@@ -200,10 +252,10 @@ if __name__ == "__main__":
     # Probability of mutation
     p_mut = 1.0
     # Stopping number for generation
-    n_iter = 7
+    n_iter = 1000
 
 
-    m, n = 5, 7
+    m, n = 5, 20
     operation_times = read_operations(m, n)
 
     gfs = GeneticFlowShop(  m, n, operation_times, 
