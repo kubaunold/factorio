@@ -1,84 +1,29 @@
 from distutils.debug import DEBUG
 import random
-from re import I
 import time
-from numpy import Inf
+from numpy import Inf, block
 from numpy.random import permutation, choice
 from app import FlowShop
 from util import read_operations, silnia
 import mutation, crossover
 from base_logger import logger as logging
-
-def calculateObj(sol):
-    qTime = queue.PriorityQueue()
-    
-    qMachines = []
-    for i in range(m):
-        qMachines.append(queue.Queue())
-    
-    for i in range(n):
-        qMachines[0].put(sol[i])
-    
-    busyMachines = []
-    for i in range(m):
-        busyMachines.append(False)
-    
-    time = 0
-    
-    job = qMachines[0].get()
-    qTime.put((time+cost[job][0], 0, job))
-    busyMachines[0] = True
-    
-    while True:
-        time, mach, job = qTime.get()
-        if job == sol[n-1] and mach == m-1:
-            break
-        busyMachines[mach] = False
-        if not qMachines[mach].empty():
-                j = qMachines[mach].get()
-                qTime.put((time+cost[j][mach], mach, j))
-                busyMachines[mach] = True
-        if mach < m-1:
-            if busyMachines[mach+1] == False:
-                qTime.put((time+cost[job][mach+1], mach+1, job))
-                busyMachines[mach+1] = True
-            else:
-                qMachines[mach+1].put(job)
-            
-    return time
-
-def selection(pop):
-    popObj = []
-    for i in range(len(pop)):
-        popObj.append([calculateObj(pop[i]), i])
-    
-    popObj.sort()
-    
-    distr = []
-    distrInd = []
-    
-    for i in range(len(pop)):
-        distrInd.append(popObj[i][1])
-        prob = (2*(i+1)) / (len(pop) * (len(pop)+1))
-        distr.append(prob)
-    
-    parents = []
-    for i in range(len(pop)):
-        parents.append(list(np.random.choice(distrInd, 2, p=distr)))
-    
-    return parents
-
-
+import matplotlib.pyplot as plt
+import numpy as np
+import os
 
 class GeneticFlowShop(FlowShop):
-    def __init__(self, m, n, operation_times, n_pop, p_cross, p_mut, n_iter) -> list:
+    def __init__(self, m, n, operation_times, n_pop, p_cross, p_mut, n_epoch, plot_progress=True) -> list:
         super().__init__(m, n, operation_times)
         self.n_pop = n_pop
         self.p_cross = p_cross
         self.p_mut = p_mut
-        self.n_iter = n_iter
+        self.n_epoch = n_epoch
         
         self.population = self.__get_initial_population()
+
+        self.plot_progress = plot_progress
+        # list of best specimen for each epoch
+        self.best_specimen = []
 
         # should I add here the following lines?
         # self.parents = []
@@ -184,6 +129,8 @@ class GeneticFlowShop(FlowShop):
 
         # print out the best specimen
         logging.info(f"Makespan of the best specimen from the current population: {best_makespan}")
+        self.best_specimen.append(best_makespan)
+
 
         # Substitue random child with best parent
         random_idx = random.randint(0, self.n_pop - 1)
@@ -198,8 +145,8 @@ class GeneticFlowShop(FlowShop):
         self.population = self.children
 
     def run(self):
-        """Run the algorithm for 'n_iter' times"""
-        for i in range(self.n_iter):
+        """Run the algorithm for 'n_epoch' times"""
+        for i in range(self.n_epoch):
             
             # Selecting parents for breeding
             self.__selection()
@@ -220,8 +167,22 @@ class GeneticFlowShop(FlowShop):
 
         
         return
+    
+    def plot(self):
+        """ Plots progress """
 
+        fig, ax = plt.subplots()
+        ax.set(xlabel='Generation', ylabel='Makespan',
+            title='Genetic Flow Shop')
+        ax.plot(range(0, self.n_epoch), self.best_specimen)
+        ax.grid()
 
+        if not os.path.exists("./results/"):
+            os.mkdir("./results/")
+            
+        fig.savefig("./results/test.png")
+
+        plt.show()
 
 
 
@@ -249,26 +210,47 @@ if __name__ == "__main__":
     # Probability of mutation
     p_mut = 1.0
     # Stopping number for generation
-    n_iter = 1000
+    n_epoch = 1000
 
 
     m, n = 5, 20
     operation_times = read_operations(m, n)
 
-    gfs = GeneticFlowShop(  m, n, operation_times, 
-                            n_pop, p_cross, p_mut, n_iter)
 
-    # Start Timer
-    t1 = time.process_time()
-    gfs.run()
-
-
-
-
-
-    # Stop Timer
-    t2 = time.process_time()
+    # best makespans for each epoch of every iteration
+    best_makespans = []
+    for i in range(3):
         
+        # Run single iteration
+        gfs = GeneticFlowShop(  m, n, operation_times, 
+                                n_pop, p_cross, p_mut, n_epoch)
+        t1 = time.process_time() # Start Timer
+        gfs.run()
+        t2 = time.process_time() # Stop Timer
+        # gfs.plot()
+        # plt.show(block=True)
+
+        # Collect result
+        best_makespans.append(gfs.best_specimen)
+
+    for i in range(3):
+        fig, ax = plt.subplots()
+        ax.set(xlabel='Generation', ylabel='Makespan',
+            title=f'Genetic Flow Shop, iteration {i}')
+        ax.plot(range(0, n_epoch), best_makespans[i])
+        ax.grid()
+
+        if not os.path.exists("./results/"):
+            os.mkdir("./results/")
+            
+        fig.savefig("./results/test.png")
+
+        plt.show()
+
+
+
+
+
     # # Results Time
 
     # bestSol, bestObj, avgObj = findBestSolution(population)
