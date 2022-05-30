@@ -24,6 +24,8 @@ class GeneticFlowShop(FlowShop):
         self.plot_progress = plot_progress
         # list of best specimen for each epoch
         self.best_specimen = []
+        self.worst_specimen = []
+        self.average_specimen = []
 
         # should I add here the following lines?
         # self.parents = []
@@ -119,6 +121,8 @@ class GeneticFlowShop(FlowShop):
         
         # initialize
         best_makespan, best_parent_idx = Inf, -1
+        worst_makespan = 0
+        average_makespan = 0
         
         # Get best specimen from old population
         for i, p in enumerate(self.population):
@@ -127,10 +131,21 @@ class GeneticFlowShop(FlowShop):
                 best_parent_idx = i
                 best_makespan = temp_makespan
 
-        # print out the best specimen
-        logging.info(f"Makespan of the best specimen from the current population: {best_makespan}")
-        self.best_specimen.append(best_makespan)
+            # check for worst makespan
+            if worst_makespan < temp_makespan:
+                worst_makespan = temp_makespan
 
+            # collect data for avg makespan
+            average_makespan += temp_makespan
+
+        # calculate avg_makespan
+        average_makespan = average_makespan / self.n_pop
+
+        # print out the best specimen
+        # logging.info(f"Makespan of the best specimen from the current population: {best_makespan}")
+        self.best_specimen.append(best_makespan)
+        self.worst_specimen.append(worst_makespan)
+        self.average_specimen.append(average_makespan)
 
         # Substitue random child with best parent
         random_idx = random.randint(0, self.n_pop - 1)
@@ -210,7 +225,7 @@ if __name__ == "__main__":
     # Probability of mutation
     p_mut = 1.0
     # Stopping number for generation
-    n_epoch = 1000
+    n_epoch = 100
 
 
     m, n = 5, 20
@@ -219,6 +234,8 @@ if __name__ == "__main__":
 
     # best makespans for each epoch of every iteration
     best_makespans = []
+    worst_makespans = []
+    average_makespans = []
     for i in range(3):
         
         # Run single iteration
@@ -232,20 +249,31 @@ if __name__ == "__main__":
 
         # Collect result
         best_makespans.append(gfs.best_specimen)
+        worst_makespans.append(gfs.worst_specimen)
+        average_makespans.append(gfs.average_specimen)
 
     for i in range(3):
         fig, ax = plt.subplots()
         ax.set(xlabel='Generation', ylabel='Makespan',
             title=f'Genetic Flow Shop, iteration {i}')
-        ax.plot(range(0, n_epoch), best_makespans[i])
+        
+        ax.plot(range(0, n_epoch), best_makespans[i], label="best makespan")
+        ax.plot(range(0, n_epoch), worst_makespans[i], label="worst makespan")
+        ax.plot(range(0, n_epoch), average_makespans[i], label="average makespan")
+        plt.legend()
         ax.grid()
+
+
+        plt.draw()
+        plt.pause(0.5)
+        plt.show()
 
         if not os.path.exists("./results/"):
             os.mkdir("./results/")
             
         fig.savefig("./results/test.png")
 
-        plt.show()
+
 
 
 
