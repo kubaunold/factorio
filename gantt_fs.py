@@ -39,7 +39,7 @@ def inicializar_gantt(maquinas, ht):
 
     # Divisiones del eje de tiempo:
     gantt.set_xticks(range(0, ht, 1), minor=True)
-    gantt.grid(True, axis='x', which='both')
+    # gantt.grid(True, axis='x', which='both')
 
     # Divisiones del eje de máquinas:
     gantt.set_yticks(range(hbar, nmaq*hbar, hbar), minor=True)

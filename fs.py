@@ -15,18 +15,18 @@ from gantt_fs import crear_y_mostrar_gantt_fs
 from time import sleep
 from util import read_operations
 
-class Operation:
-    """Most atomic cell of a FlowShop problem"""
+# class Operation:
+#     """Most atomic cell of a FlowShop problem"""
 
-    def __init__(self, duration=None, start=None, finish=None, machine_number=None, job_number=None) -> None:
-        self.duration = duration
-        self.start = start
-        self.finish = finish
-        self.machine_number = machine_number
-        self.job_number = job_number
+#     def __init__(self, duration=None, start=None, finish=None, machine_number=None, job_number=None) -> None:
+#         self.duration = duration
+#         self.start = start
+#         self.finish = finish
+#         self.machine_number = machine_number
+#         self.job_number = job_number
 
-    def __repr__(self) -> str:
-        return f"op[{self.machine_number}][{self.job_number}]=[{self.duration}]"
+#     def __repr__(self) -> str:
+#         return f"op[{self.machine_number}][{self.job_number}]=[{self.duration}]"
 
 
 class FlowShop:
@@ -68,16 +68,16 @@ class FlowShop:
             for n in range(self.n):
                 # technological ancestor finish - finish time of an operation that's a tech predecessor
                 # poprzednik technologiczny - operacja z tego zadania, ale poprzedniej maszyny
-                taf = self.technological_ancestor_finish(permutation, m, n)
+                taf = self.__technological_ancestor_finish(permutation, m, n)
                 # order ancestor finish - finish time of an operation that's an oredr predecessor
                 # poprzednik kolejnościowy - inne zadanie z tej samej maszyny
-                oaf = self.order_ancestor_finish(permutation, m, n)
+                oaf = self.__order_ancestor_finish(permutation, m, n)
                 # operation starts on later of these two
                 self.time_start[m][permutation[n]] = max(taf, oaf)
 
         return self.time_start[-1][permutation[-1]] + self.duration[-1][permutation[-1]]
 
-    def technological_ancestor_finish(self, permutation, m, n) -> int:
+    def __technological_ancestor_finish(self, permutation, m, n) -> int:
         """Calculates finish time of an operation, that's a technological predecessor
         to operation[m][n]"""
         if m == 0 and n == 0:
@@ -89,7 +89,7 @@ class FlowShop:
         elif m != 0 and n != 0:
             return self.time_start[m-1][permutation[n]] + self.duration[m-1][permutation[n]]
 
-    def order_ancestor_finish(self, permutation, m, n) -> int:
+    def __order_ancestor_finish(self, permutation, m, n) -> int:
         """Calculates finish time of an operation, that's an order predecessor
         to operation[m][n]"""
         if m == 0 and n == 0:
@@ -101,8 +101,10 @@ class FlowShop:
         elif m != 0 and n != 0:
             return self.time_start[m][permutation[n-1]] + self.duration[m][permutation[n-1]]
 
-    def get_schedule(self):
-        """Creates schedule - dict with task duration and start times"""
+    def get_schedule(self) -> list[dict]:
+        """ Creates schedule - list of dicts for every operation containing its start time and duration
+            for the purpose of Gantt diagram visualization """
+
         def add_subtask(schedule, t0, d, i_maq, i_tarea):
             # Dict of a subtask
             subtask = {'t0': t0, 'd': d, 'i_machine': i_maq, 'i_task': i_tarea}
@@ -129,7 +131,7 @@ def main():
     fs = FlowShop(m=m, n=n, operation_times=operation_times)
     
     import itertools
-    all_permms = list(itertools.permutations(list(i for i in range(n))))
+    all_perms = list(itertools.permutations(list(i for i in range(n))))
     
 
     best_makespan = inf
@@ -137,11 +139,11 @@ def main():
     best_schedule = []
     makespan_list = []
     
-    for permutation in all_permms:
+    for permutation in all_perms:
         makespan = fs.calculate_makespan(permutation)
         schedule = fs.get_schedule()
 
-        print(f"{schedule=}")
+        # print(f"{schedule=}")
 
         if makespan < best_makespan:
             best_makespan = makespan
@@ -153,10 +155,10 @@ def main():
 
     machine_names = ["M0", "M1", "M2", "M3", "M4"]
     job_names = ["T0", "T1", "T2", "T3", "T4", "T5", "T6"]
-    print(f"{best_makespan=}")
-    print(f"{best_permutation=}")
-    crear_y_mostrar_gantt_fs(schedule, machine_names, job_names)
-    print(f"{makespan_list=}")
+    # print(f"{best_makespan=}")
+    # print(f"{best_permutation=}")
+    crear_y_mostrar_gantt_fs(best_schedule, machine_names, job_names)
+    # print(f"{makespan_list=}")
 
 
 if __name__ == '__main__':

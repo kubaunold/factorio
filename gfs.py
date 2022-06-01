@@ -1,9 +1,13 @@
+"""
+Module containing Genetic Flow Shop class definition
+
+"""
 from distutils.debug import DEBUG
 import random
 import time
 from numpy import Inf, block
 from numpy.random import permutation, choice
-from app import FlowShop
+from fs import FlowShop
 from util import read_operations, silnia
 import mutation, crossover
 from base_logger import logger as logging
@@ -20,12 +24,14 @@ class GeneticFlowShop(FlowShop):
         self.n_epoch = n_epoch
         
         self.population = self.__get_initial_population()
-
         self.plot_progress = plot_progress
         # list of best specimen for each epoch
         self.best_specimen = []
         self.worst_specimen = []
         self.average_specimen = []
+
+        # List of tuples: best permutations across all generations with their makespans
+        self.best_permutation_with_makespan = []
 
         # should I add here the following lines?
         # self.parents = []
@@ -70,6 +76,10 @@ class GeneticFlowShop(FlowShop):
         # sort by ascending value makespan (the fittest is at the beginning)
         pop_w_makespan.sort()
 
+
+        # here update the best permutation in this generation
+        best_makespan,best_citizen_idx = pop_w_makespan[0]
+        self.best_permutation_with_makespan.append((self.population[best_citizen_idx], best_makespan))
 
         # create distribution values
         distr_ind = []
@@ -175,8 +185,6 @@ class GeneticFlowShop(FlowShop):
             # elitist update - bring few best from the previous iteration
             self.__elitist_update()
 
-            logging.info(f"Iter[{i}]: makespan of 1st child: {self.calculate_makespan(self.children[0])}")
- 
             # kill parents (pupulation). Make children the new parents (population).
             self.__grow_children()
 
@@ -226,83 +234,21 @@ if __name__ == "__main__":
     p_mut = 1.0
     # Stopping number for generation
     n_epoch = 100
-
-
+    # Number of machines and tasks
     m, n = 5, 20
+
+    # Read operation times
     operation_times = read_operations(m, n)
 
+    # Run single iteration
+    gfs = GeneticFlowShop(  m, n, operation_times, 
+                            n_pop, p_cross, p_mut, n_epoch)
+    t1 = time.process_time() # Start Timer
+    gfs.run()
+    t2 = time.process_time() # Stop Timer
+    # gfs.plot()
+    # plt.show(block=True)
 
-    # best makespans for each epoch of every iteration
-    best_makespans = []
-    worst_makespans = []
-    average_makespans = []
-    for i in range(3):
-        
-        # Run single iteration
-        gfs = GeneticFlowShop(  m, n, operation_times, 
-                                n_pop, p_cross, p_mut, n_epoch)
-        t1 = time.process_time() # Start Timer
-        gfs.run()
-        t2 = time.process_time() # Stop Timer
-        # gfs.plot()
-        # plt.show(block=True)
-
-        # Collect result
-        best_makespans.append(gfs.best_specimen)
-        worst_makespans.append(gfs.worst_specimen)
-        average_makespans.append(gfs.average_specimen)
-
-    for i in range(3):
-        fig, ax = plt.subplots()
-        ax.set(xlabel='Generation', ylabel='Makespan',
-            title=f'Genetic Flow Shop, iteration {i}')
-        
-        ax.plot(range(0, n_epoch), best_makespans[i], label="best makespan")
-        ax.plot(range(0, n_epoch), worst_makespans[i], label="worst makespan")
-        ax.plot(range(0, n_epoch), average_makespans[i], label="average makespan")
-        plt.legend()
-        ax.grid()
-
-
-        plt.draw()
-        plt.pause(0.5)
-        plt.show()
-
-        if not os.path.exists("./results/"):
-            os.mkdir("./results/")
-            
-        fig.savefig("./results/test.png")
-
-
-
-
-
-
-
-    # # Results Time
-
-    # bestSol, bestObj, avgObj = findBestSolution(population)
-        
-    # print("Population:")
-    # print(population)
-    # print() 
-
-    # print("Solution:")
-    # print(population[bestSol])
-    # print() 
-
-    # print("Objective Value:")
-    # print(bestObj)
-    # print()
-
-    # print("Average Objective Value of Population:")
-    # print("%.2f" %avgObj)
-    # print()
-
-    # print("%Gap:")
-    # G = 100 * (bestObj-optimalObjective) / optimalObjective
-    # print("%.2f" %G)
-    # print()
 
     print("CPU Time (s)")
     timePassed = (t2-t1)

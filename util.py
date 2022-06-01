@@ -30,6 +30,20 @@ def average_of_list(m: list[list[int]]) -> list[int]:
 
     return avg_list
 
+def who_is_the_best(perm_and_makespan_list):
+    res = []
+    
+    #get last elements
+    for i in perm_and_makespan_list:
+        res.append(i[-1])
+
+    def my_func(x):
+        p, m = x
+        return m
+
+    res.sort(key = my_func) # smallest makespan value at the beginning
+    return res[0]
+
 if __name__ == '__main__':
     m = [[1,2,3,4, 7], [5,6,7,8, 11]]
     print(average_of_list(m))
