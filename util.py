@@ -44,6 +44,12 @@ def who_is_the_best(perm_and_makespan_list):
     res.sort(key = my_func) # smallest makespan value at the beginning
     return res[0]
 
+def sum_of_list(l):
+    sum = 0
+    for i in l:
+        sum += i
+    return sum
+
 if __name__ == '__main__':
     m = [[1,2,3,4, 7], [5,6,7,8, 11]]
     print(average_of_list(m))

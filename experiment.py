@@ -86,7 +86,6 @@ def main():
         # show gantt diagram
         # best_schedule = gfs.get_schedule(single_best_permutation)
         best_schedule = gfs.get_schedule()
-        best_schedule = gfs.get_schedule()
         machine_names = ["M0", "M1", "M2", "M3", "M4"]
         job_names = ["T0", "T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9", "T10", "T11", "T12", "T13", "T14", "T15", "T16", "T17", "T18", "T19"]
         crear_y_mostrar_gantt_fs(best_schedule, machine_names, job_names)

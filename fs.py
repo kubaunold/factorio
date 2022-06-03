@@ -57,7 +57,6 @@ class FlowShop:
         # self.pi = [3, 1, 0, 2]               # permutation
         # self.solution = (pi, cmax)      # solution is a tuple of permutation and its makespan
         
-        print(f"FlowShop object created")
 
     def __repr__(self) -> str:
         return f"My operations: {self.duration}"

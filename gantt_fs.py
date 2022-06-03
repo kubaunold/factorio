@@ -5,9 +5,12 @@
 # Fecha: Octubre 2020                                           #
 #################################################################
 
+from this import s
 import matplotlib.pyplot as plt
 import numpy as np
 import random
+
+from breakdown import Breakdown
 
 def inicializar_gantt(maquinas, ht):
     # Parámetros:
@@ -80,10 +83,14 @@ def add_subtask(diagrama, t0, d, maq, job_namesea, color=None):
     gantt.text(x=(t0 + d/2), y=(hbar*imaq + hbar/2),
                   s=f"{job_namesea} ({d})", va='center', ha='center', color='white')
 
-def completar_gantt(diagrama, schedule, n_maqs, n_tareas):
+def add_machinebreakdown(diagrama, breakdown:Breakdown):
+    gantt = diagrama["ax"]
+    gantt.text( x=10, y=20,
+                s=f"breakdown {breakdown.breakdown_duration}", color='black')
+
+def completar_gantt(diagrama, schedule, n_maqs, n_tareas, breakdown=None):
     # Agregamos las subtasks:
     for subtask in schedule:
-
         add_subtask(
             diagrama,
             subtask["t0"],
@@ -92,7 +99,16 @@ def completar_gantt(diagrama, schedule, n_maqs, n_tareas):
             n_tareas[subtask["i_task"]]
         )
 
-def crear_gantt_fs(schedule, n_maqs, n_tareas):
+
+
+    if breakdown is not None:
+        # add machine breakdown
+        add_machinebreakdown(
+            diagrama,
+            breakdown,
+        )
+
+def crear_gantt_fs(schedule, n_maqs, n_tareas, breakdown=None):
     # Horizonte temporal:
     # ultima_subtask = schedule[-1]
     # ht = ultima_subtask["t0"] + ultima_subtask["d"]
@@ -106,14 +122,14 @@ def crear_gantt_fs(schedule, n_maqs, n_tareas):
     diagrama = inicializar_gantt(n_maqs, int(ht))
 
     # Completamos el gantt:
-    completar_gantt(diagrama, schedule, n_maqs, n_tareas)
+    completar_gantt(diagrama, schedule, n_maqs, n_tareas, breakdown=breakdown)
 
     # Retornamos el diagrama:
     return diagrama
 
-def crear_y_mostrar_gantt_fs(schedule, n_maqs, n_tareas):
+def crear_y_mostrar_gantt_fs(schedule, n_maqs, n_tareas, breakdown=None):
     # Creamos el gantt:
-    crear_gantt_fs(schedule, n_maqs, n_tareas)
+    crear_gantt_fs(schedule, n_maqs, n_tareas, breakdown=breakdown)
 
     # Plotteamos:
     mostrar()
