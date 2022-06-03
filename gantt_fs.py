@@ -12,7 +12,7 @@ import random
 
 from breakdown import Breakdown
 
-def inicializar_gantt(maquinas, ht):
+def initialize_gantt(maquinas, ht):
     # Parámetros:
     hbar = 10
     tticks = 10
@@ -55,8 +55,8 @@ def inicializar_gantt(maquinas, ht):
 
     return diagrama
 
-# Función para armar tareas:
 def add_subtask(diagrama, t0, d, maq, job_namesea, color=None):
+    """Function for adding tasks to the diagram"""
     maquinas = diagrama["maquinas"]
     hbar = diagrama["hbar"]
     gantt = diagrama["ax"]
@@ -85,30 +85,40 @@ def add_subtask(diagrama, t0, d, maq, job_namesea, color=None):
 
 def add_machinebreakdown(diagrama, breakdown:Breakdown):
     gantt = diagrama["ax"]
-    gantt.text( x=10, y=20,
-                s=f"breakdown {breakdown.breakdown_duration}", color='black')
+    hbar = diagrama["hbar"]
+    imaq = breakdown.m
+    mb_color = (1, 0, 0)
 
-def completar_gantt(diagrama, schedule, n_maqs, n_tareas, breakdown=None):
-    # Agregamos las subtasks:
+    # Position machine machine breakdown
+    gantt.broken_barh(  xranges=[(breakdown.t0, breakdown.breakdown_duration)],
+                        yrange=(hbar*imaq, hbar),
+                        facecolors=(mb_color),
+                        hatch='/')
+
+    gantt.text( x=(breakdown.t0 + breakdown.breakdown_duration/2),
+                y=(hbar*imaq + hbar/2),
+                s=f"MB {breakdown.breakdown_duration}",
+                color='black')
+
+def complete_gantt(diagrama, schedule, machine_names, task_names, breakdown=None):
+    # Add subtasks:
     for subtask in schedule:
         add_subtask(
             diagrama,
             subtask["t0"],
             subtask["d"],
-            n_maqs[subtask["i_machine"]],
-            n_tareas[subtask["i_task"]]
+            machine_names[subtask["i_machine"]],
+            task_names[subtask["i_task"]]
         )
 
-
-
+    # Add machine breakdown
     if breakdown is not None:
-        # add machine breakdown
         add_machinebreakdown(
             diagrama,
             breakdown,
         )
 
-def crear_gantt_fs(schedule, n_maqs, n_tareas, breakdown=None):
+def create_gantt_fs(schedule, machine_names, task_names, breakdown=None):
     # Horizonte temporal:
     # ultima_subtask = schedule[-1]
     # ht = ultima_subtask["t0"] + ultima_subtask["d"]
@@ -119,19 +129,16 @@ def crear_gantt_fs(schedule, n_maqs, n_tareas, breakdown=None):
         ht = max(ht, end_of_task)
 
     # Creamos el diagrama de gantt:
-    diagrama = inicializar_gantt(n_maqs, int(ht))
+    diagrama = initialize_gantt(machine_names, int(ht))
 
     # Completamos el gantt:
-    completar_gantt(diagrama, schedule, n_maqs, n_tareas, breakdown=breakdown)
+    complete_gantt(diagrama, schedule, machine_names, task_names, breakdown=breakdown)
 
     # Retornamos el diagrama:
     return diagrama
 
-def crear_y_mostrar_gantt_fs(schedule, n_maqs, n_tareas, breakdown=None):
-    # Creamos el gantt:
-    crear_gantt_fs(schedule, n_maqs, n_tareas, breakdown=breakdown)
-
-    # Plotteamos:
+def crear_y_mostrar_gantt_fs(schedule, machine_names, task_names, breakdown=None):
+    create_gantt_fs(schedule, machine_names, task_names, breakdown=breakdown)
     mostrar()
 
 def mostrar():
