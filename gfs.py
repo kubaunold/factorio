@@ -1,5 +1,6 @@
 """
-Module containing Genetic Flow Shop class definition
+Module containing Genetic Flow Shop class definition. It expands FlowShop class by 
+solving FS problem using Genetic Algorithm.
 
 """
 from distutils.debug import DEBUG

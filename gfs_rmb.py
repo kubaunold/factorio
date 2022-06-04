@@ -1,10 +1,10 @@
-from ast import Break
+""" class solving Flow Shop with Machine Breakdown using Genetic Algorithm """
 
 from matplotlib import pyplot as plt
-from gantt_fs import crear_y_mostrar_gantt_fs
+from gantt_fs import create_and_show_gantt_fs
 from gfs import GeneticFlowShop
 from base_logger import logger as logging
-from util import read_operations, sum_of_list
+from util import read_operations, sum_of_list, get_machine_names, get_task_names
 from random import randint
 from breakdown import Breakdown
 
@@ -17,7 +17,7 @@ class GeneticFlowShopWithMachineBreakdown(GeneticFlowShop):
 
 
     def __generate_breakdown(self):
-        makespan = sum_of_list(self.duration[0])
+        makespan = sum_of_list(self.op_times[0])
         breakdown_duration = max(randint(5,15), int(makespan * self.failure_size))
 
         return Breakdown(randint(0,self.m - 1), randint(0, makespan), breakdown_duration)
@@ -26,9 +26,9 @@ class GeneticFlowShopWithMachineBreakdown(GeneticFlowShop):
         _ = self.calculate_makespan([0,2,1,3])
         some_schedule = self.get_schedule()
 
-        machine_names = ["M0", "M1", "M2", "M3"]
-        job_names = ["T0", "T1", "T2", "T3"]
-        crear_y_mostrar_gantt_fs(some_schedule, machine_names, job_names, breakdown=self.breakdown)
+        machine_names = get_machine_names(self.m)
+        job_names = get_task_names(self.n)
+        create_and_show_gantt_fs(some_schedule, machine_names, job_names, breakdown=self.breakdown)
 
 
 
@@ -56,6 +56,8 @@ def main():
     # Run single iteration
     gfsrmb = GeneticFlowShopWithMachineBreakdown(  m, n, operation_times, 
                             n_pop, p_cross, p_mut, n_epoch, failure_size)
+
+
 
     gfsrmb.plot_sample()
     

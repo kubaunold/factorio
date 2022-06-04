@@ -50,6 +50,25 @@ def sum_of_list(l):
         sum += i
     return sum
 
+def get_machine_names(n):
+    """ Returns list with n machine names 
+        e.g. 4 -> ['M0', 'M1', 'M2', 'M3'] """
+    l = []
+
+    for i in range(n):
+        l.append(f"M{i}")
+
+    return l
+
+def get_task_names(n):
+    """ Returns list with n task names 
+        e.g. 3 -> ['T0', 'T1', 'T2'] """
+    return [f"T{i}" for i in range(n)]
+
+
 if __name__ == '__main__':
-    m = [[1,2,3,4, 7], [5,6,7,8, 11]]
-    print(average_of_list(m))
+    # m = [[1,2,3,4, 7], [5,6,7,8, 11]]
+    # print(average_of_list(m))
+
+    print(get_machine_names(4))
+    print(get_task_names(3))

@@ -8,7 +8,7 @@ from gfs import GeneticFlowShop
 from util import read_operations, average_of_list, who_is_the_best
 import matplotlib.pyplot as plt
 import os
-from gantt_fs import crear_y_mostrar_gantt_fs
+from gantt_fs import create_and_show_gantt_fs
 
 
 def main():
@@ -88,7 +88,7 @@ def main():
         best_schedule = gfs.get_schedule()
         machine_names = ["M0", "M1", "M2", "M3", "M4"]
         job_names = ["T0", "T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9", "T10", "T11", "T12", "T13", "T14", "T15", "T16", "T17", "T18", "T19"]
-        crear_y_mostrar_gantt_fs(best_schedule, machine_names, job_names)
+        create_and_show_gantt_fs(best_schedule, machine_names, job_names)
 
     else:
         raise Exception("Sorry, length of best, worst and avergae makespans list do not match n_epoch")

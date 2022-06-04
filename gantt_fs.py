@@ -137,7 +137,7 @@ def create_gantt_fs(schedule, machine_names, task_names, breakdown=None):
     # Retornamos el diagrama:
     return diagrama
 
-def crear_y_mostrar_gantt_fs(schedule, machine_names, task_names, breakdown=None):
+def create_and_show_gantt_fs(schedule, machine_names, task_names, breakdown=None):
     create_gantt_fs(schedule, machine_names, task_names, breakdown=breakdown)
     mostrar()
 
