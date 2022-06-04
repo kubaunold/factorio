@@ -3,21 +3,20 @@ Module containing Genetic Flow Shop class definition. It expands FlowShop class 
 solving FS problem using Genetic Algorithm.
 
 """
-from distutils.debug import DEBUG
 import random
 import time
-from numpy import Inf, block
+from numpy import Inf
 from numpy.random import permutation, choice
 from fs import FlowShop
 from util import read_operations, silnia
 import mutation, crossover
 from base_logger import logger as logging
 import matplotlib.pyplot as plt
-import numpy as np
 import os
 
 class GeneticFlowShop(FlowShop):
-    def __init__(self, m, n, operation_times, n_pop, p_cross, p_mut, n_epoch, plot_progress=True) -> list:
+    def __init__(   self, m, n, operation_times,
+                    n_pop, p_cross, p_mut, n_epoch) -> list:
         super().__init__(m, n, operation_times)
         self.n_pop = n_pop
         self.p_cross = p_cross
@@ -25,7 +24,6 @@ class GeneticFlowShop(FlowShop):
         self.n_epoch = n_epoch
         
         self.population = self.__get_initial_population()
-        self.plot_progress = plot_progress
         # list of best specimen for each epoch
         self.best_specimen = []
         self.worst_specimen = []
@@ -110,7 +108,6 @@ class GeneticFlowShop(FlowShop):
                 else:
                     self.children.append(self.population[p[1]])
         
-
     def __mutation(self):
         """ Apply mutation.
             Affects self.children list"""
@@ -121,8 +118,7 @@ class GeneticFlowShop(FlowShop):
             if r < self.p_mut:
                 c = mutation.mutation(c)
         logging.debug("Mutation finished.")
-
-        
+ 
     def __elitist_update(self):
         """ Add best specimen from previous population (self.population)
             instead of a random one from the children (self.children)
@@ -189,7 +185,6 @@ class GeneticFlowShop(FlowShop):
             # kill parents (pupulation). Make children the new parents (population).
             self.__grow_children()
 
-        
         return
     
     def plot(self):
@@ -218,7 +213,6 @@ if __name__ == "__main__":
     logging.info("I'm an informational message.")
     logging.debug("I'm a message for debugging purposes.")
     logging.warning("I'm a warning. Beware!")
-
     """
     ● DEBUG: You should use this level for debugging purposes in development.
     ● INFO: You should use this level when something interesting—but expected—happens (e.g., a user starts a new project in a project management application).
@@ -247,9 +241,8 @@ if __name__ == "__main__":
     t1 = time.process_time() # Start Timer
     gfs.run()
     t2 = time.process_time() # Stop Timer
-    # gfs.plot()
+    gfs.plot()
     # plt.show(block=True)
-
 
     print("CPU Time (s)")
     timePassed = (t2-t1)

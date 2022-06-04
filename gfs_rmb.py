@@ -1,40 +1,221 @@
 """ class solving Flow Shop with Machine Breakdown using Genetic Algorithm """
 
-from matplotlib import pyplot as plt
+from asynchat import simple_producer
+import random
+import time
+from numpy import Inf
+from numpy.random import permutation, choice
+from fs_rmb import FlowShopWithMachineBreakdown
 from gantt_fs import create_and_show_gantt_fs
-from gfs import GeneticFlowShop
+from util import get_machine_names, get_task_names, read_operations, silnia
+import mutation, crossover
 from base_logger import logger as logging
-from util import read_operations, sum_of_list, get_machine_names, get_task_names
-from random import randint
-from breakdown import Breakdown
+import matplotlib.pyplot as plt
+import os
 
-class GeneticFlowShopWithMachineBreakdown(GeneticFlowShop):
-    def __init__(self, m, n, operation_times, n_pop, p_cross, p_mut, n_epoch, failure_size, plot_progress=True) -> list:
-        super().__init__(m, n, operation_times, n_pop, p_cross, p_mut, n_epoch, plot_progress=True)
-        self.failure_size = failure_size
+class GeneticFlowShopWithMachineBreakdown(FlowShopWithMachineBreakdown):
+    def __init__(   self, m, n, operation_times,
+                    n_pop, p_cross, p_mut, n_epoch,
+                    failure_size) -> list:
+        super().__init__(m, n, operation_times, failure_size)
+        self.n_pop = n_pop
+        self.p_cross = p_cross
+        self.p_mut = p_mut
+        self.n_epoch = n_epoch
+        
+        self.population = self.__get_initial_population()
+        # list of best specimen for each epoch
+        self.best_specimen = []
+        self.worst_specimen = []
+        self.average_specimen = []
 
-        self.breakdown = self.__generate_breakdown()
+        # List of tuples: best permutations across all generations and its makespan
+        self.best_permutation_with_makespan = []
+
+        # should I add here the following lines?
+        # self.parents = []
+        # self.children = []
+
+    def __get_initial_population(self) -> list:
+        """Creating the initial population (n_pop distinct chromosomes)"""
+
+        pop = []
+        allow_duplicate = False
+
+        if self.n_pop > silnia(self.m):
+            logging.warning("Warning! Size of the population exceeds number of possible permutations.py. There will be duplicate permutations.")
+            allow_duplicate = True
+
+        # Select specimen one by one
+        for i in range(self.n_pop):
+            p = list(permutation(self.n))
+            if allow_duplicate:
+                p = list(permutation(self.n))
+            else:
+                while p in pop:
+                    p = list(permutation(self.n))
+
+            pop.append(p)
+
+        return pop
+
+    def __selection(self) -> None:
+        """ Select parents based on given population.
+            Creates self.parents list. """
+        
+        # Create and purge parents for future incoming offspring
+        self.parents = []
+
+        # create list of tuples such as: (makespan, index)
+        pop_w_makespan = []
+        for i in range(self.n_pop):
+            pop_w_makespan.append([self.calculate_makespan(self.population[i]), i]) 
 
 
-    def __generate_breakdown(self):
-        makespan = sum_of_list(self.op_times[0])
-        breakdown_duration = max(randint(5,15), int(makespan * self.failure_size))
+        # sort by ascending value makespan (the fittest is at the beginning)
+        pop_w_makespan.sort()
 
-        return Breakdown(randint(0,self.m - 1), randint(0, makespan), breakdown_duration)
 
-    def plot_sample(self):
-        _ = self.calculate_makespan([0,2,1,3])
-        some_schedule = self.get_schedule()
+        # here update the best permutation in this generation
+        best_makespan,best_citizen_idx = pop_w_makespan[0]
+        self.best_permutation_with_makespan.append((self.population[best_citizen_idx], best_makespan))
 
-        machine_names = get_machine_names(self.m)
-        job_names = get_task_names(self.n)
-        create_and_show_gantt_fs(some_schedule, machine_names, job_names, breakdown=self.breakdown)
+        # create distribution values
+        distr_ind = []
+        distr = []
+        for i in range(self.n_pop):
+            distr_ind.append(pop_w_makespan[i][1])
+            distr.append((2*(i+1)) / (self.n_pop * (self.n_pop+1)))
 
+
+        # select parents (for each new child there are 2 parents)
+        for i in range(self.n_pop):
+            self.parents.append(list(choice(distr_ind, 2, p=distr)))
+    
+    def __crossover(self) -> None:
+        """ Apply crossover.
+            Create and fill out self.children list """
+
+        self.children = []
+
+        for p in self.parents:
+            r = random.random()
+            if r < self.p_cross:
+                self.children.append(crossover.ordered_crossover(self.population[p[0]], self.population[p[1]])) 
+            else:
+                if r < 0.5:
+                    self.children.append(self.population[p[0]])
+                else:
+                    self.children.append(self.population[p[1]])
+        
+    def __mutation(self):
+        """ Apply mutation.
+            Affects self.children list"""
+
+        logging.debug("Starting mutation.")
+        for c in self.children:
+            r = random.random()
+            if r < self.p_mut:
+                c = mutation.mutation(c)
+        logging.debug("Mutation finished.")
+ 
+    def __elitist_update(self):
+        """ Add best specimen from previous population (self.population)
+            instead of a random one from the children (self.children)
+            Affects self.children list """
+
+        logging.debug("Starting elitist update.")
+        
+        # initialize
+        best_makespan, best_parent_idx = Inf, -1
+        worst_makespan = 0
+        average_makespan = 0
+        
+        # Get best specimen from old population
+        for i, p in enumerate(self.population):
+            temp_makespan = self.calculate_makespan(p)
+            if temp_makespan < best_makespan:
+                best_parent_idx = i
+                best_makespan = temp_makespan
+
+            # check for worst makespan
+            if worst_makespan < temp_makespan:
+                worst_makespan = temp_makespan
+
+            # collect data for avg makespan
+            average_makespan += temp_makespan
+
+        # calculate avg_makespan
+        average_makespan = average_makespan / self.n_pop
+
+        # print out the best specimen
+        # logging.info(f"Makespan of the best specimen from the current population: {best_makespan}")
+        self.best_specimen.append(best_makespan)
+        self.worst_specimen.append(worst_makespan)
+        self.average_specimen.append(average_makespan)
+
+        # Substitue random child with best parent
+        random_idx = random.randint(0, self.n_pop - 1)
+        self.children[random_idx] = self.population[best_parent_idx]
+
+        logging.debug("Elitist update finished.")
+
+    def __grow_children(self):
+        """ Kill parents (self.population) and make children the new parents
+            Affects self.population list """
+
+        self.population = self.children
+
+    def run(self):
+        """Run the algorithm for 'n_epoch' times"""
+        for i in range(self.n_epoch):
+            
+            # Selecting parents for breeding
+            self.__selection()
+            
+            # Create offspring from parents by crossover
+            self.__crossover()
+
+            # Mutate offspring
+            self.__mutation()
+
+            # elitist update - bring few best from the previous iteration
+            self.__elitist_update()
+
+            # kill parents (pupulation). Make children the new parents (population).
+            self.__grow_children()
+
+        return
+    
+    def plot(self):
+        """ Plots progress """
+
+        fig, ax = plt.subplots()
+        ax.set(xlabel='Generation', ylabel='Makespan',
+            title='Genetic Flow Shop')
+        ax.plot(range(0, self.n_epoch), self.best_specimen)
+        ax.grid()
+
+        if not os.path.exists("./results/"):
+            os.mkdir("./results/")
+            
+        fig.savefig("./results/test.png")
+
+        plt.show()
 
 
 
 def main():
-    logging.info("I'm inside GFS with RMB!.")
+    logging.info("I'm an informational message.")
+    logging.debug("I'm a message for debugging purposes.")
+    logging.warning("I'm a warning. Beware!")
+    """
+    ● DEBUG: You should use this level for debugging purposes in development.
+    ● INFO: You should use this level when something interesting—but expected—happens (e.g., a user starts a new project in a project management application).
+    ● WARNING: You should use this level when something unexpected or unusual happens. It’s not an error, but you should pay attention to it.
+    ● ERROR: This level is for things that go wrong but are usually recoverable (e.g., internal exceptions you can handle or APIs returning error results).
+    ● CRITICAL: You should use this level in a doomsday scenario. The application is unusable. At this level, someone should be woken up at 2 a.m.
+    """
 
     # Number of population
     n_pop = 4
@@ -45,23 +226,45 @@ def main():
     # Stopping number for generation
     n_epoch = 100
     # Number of machines and tasks
-    m, n = 3, 4
-
+    m, n = 5, 7
+    # Failure size
+    failure_size = 0.03
     # Read operation times
     operation_times = read_operations(m, n)
 
-    # [0,1] - size of machine unavailability counted as failure_size * makespan
-    failure_size = 0.05
-
     # Run single iteration
-    gfsrmb = GeneticFlowShopWithMachineBreakdown(  m, n, operation_times, 
-                            n_pop, p_cross, p_mut, n_epoch, failure_size)
+    gfsrmb = GeneticFlowShopWithMachineBreakdown(
+        m, n, operation_times, 
+        n_pop, p_cross, p_mut, n_epoch,
+        failure_size)
 
+    t1 = time.process_time() # Start Timer
+    gfsrmb.run()
+    t2 = time.process_time() # Stop Timer
 
+    print("CPU Time (s)")
+    timePassed = (t2-t1)
+    print("%.2f" %timePassed)
 
-    gfsrmb.plot_sample()
+    # Show best permutation on gantt diagram
+    (best_permutation, _) = gfsrmb.best_permutation_with_makespan[-1]
+    _ = gfsrmb.calculate_makespan(best_permutation)
     
-    x=5
+    # Show simple permutation
+    # simple_permutation = [i for i in range(n)]
+    # _ = gfsrmb.calculate_makespan(simple_permutation)
 
-if __name__ == '__main__':
+
+    schedule = gfsrmb.get_schedule()
+
+    machine_names = get_machine_names(m)
+    job_names = get_task_names(n)
+    create_and_show_gantt_fs(schedule, machine_names, job_names, breakdown=gfsrmb.breakdown)
+
+    
+
+
+
+
+if __name__ == "__main__":
     main()

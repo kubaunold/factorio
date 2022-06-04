@@ -37,15 +37,20 @@ class FlowShopWithMachineBreakdown(FlowShop):
                 # start time is the later of these two
                 start_time = max(taf, maf)
 
-
                 if m == self.breakdown.m:
-                    # does the machine breakdown occur?
-                    if (start_time + self.start_times[m][permutation[n]]) < self.breakdown.t0:
-                        # will this op have enough time to finish before the breakdown start?
+                    # there is a breakdown
+                    if (start_time + self.op_times[m][permutation[n]]) <= self.breakdown.t0:
+                        # op will finish before the breakdown start
                         self.start_times[m][permutation[n]] = start_time
                     else:
-                        # insert it right after the machine gets fixed
-                        self.start_times[m][permutation[n]] = self.breakdown.t0 + self.breakdown.breakdown_duration
+                        # op has to start after
+                        self.start_times[m][permutation[n]] = max(start_time, self.breakdown.t0 + self.breakdown.breakdown_duration)
+                else:
+                    # there is no breakdown on this machine
+                    self.start_times[m][permutation[n]] = start_time
+
+        return self.start_times[-1][permutation[-1]] + self.op_times[-1][permutation[-1]]
+
 
     def plot_sample(self):
         _ = self.calculate_makespan([0,2,1,3])
@@ -63,7 +68,7 @@ def main():
     operation_times = read_operations(m, n)
     failure_size = 0.03
     fs_rmb = FlowShopWithMachineBreakdown(m, n, operation_times, failure_size)
-    fs_rmb.plot_sample()
+    # fs_rmb.plot_sample()
 
 
 if __name__ == '__main__':
