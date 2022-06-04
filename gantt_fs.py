@@ -5,7 +5,6 @@
 # Fecha: Octubre 2020                                           #
 #################################################################
 
-from this import s
 import matplotlib.pyplot as plt
 import numpy as np
 import random

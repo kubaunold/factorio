@@ -3,14 +3,11 @@ Module implementing FlowShop problem with additional Random Machine Breakdown, m
 that there will be a certain machine unavailable for given period of time.
 """
 
-from cmath import inf
 from random import randint
 import random
-from numpy import Inf, zeros
 from breakdown import Breakdown
 from fs import FlowShop
 from gantt_fs import create_and_show_gantt_fs
-from time import sleep
 from util import get_machine_names, get_task_names, read_operations, sum_of_list
 
 class FlowShopWithMachineBreakdown(FlowShop):

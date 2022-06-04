@@ -10,26 +10,9 @@ Steps:
 """
 
 from cmath import inf
-from random import randint
-from numpy import Inf, zeros
-from breakdown import Breakdown
+from numpy import zeros
 from gantt_fs import create_and_show_gantt_fs
-from time import sleep
 from util import get_machine_names, get_task_names, read_operations, sum_of_list
-
-# class Operation:
-#     """Most atomic cell of a FlowShop problem"""
-
-#     def __init__(self, duration=None, start=None, finish=None, machine_number=None, job_number=None) -> None:
-#         self.op_times = duration
-#         self.start = start
-#         self.finish = finish
-#         self.machine_number = machine_number
-#         self.job_number = job_number
-
-#     def __repr__(self) -> str:
-#         return f"op[{self.machine_number}][{self.job_number}]=[{self.op_times}]"
-
 
 class FlowShop:
     """Object for solving FlowShop problem"""
@@ -130,7 +113,6 @@ def main():
     
     import itertools
     all_perms = list(itertools.permutations(list(i for i in range(n))))
-    
 
     best_makespan = inf
     best_permutation = []
@@ -140,8 +122,6 @@ def main():
     for permutation in all_perms:
         makespan = fs.calculate_makespan(permutation)
         schedule = fs.get_schedule()
-
-        # print(f"{schedule=}")
 
         if makespan < best_makespan:
             best_makespan = makespan
@@ -153,10 +133,7 @@ def main():
 
     machine_names = ["M0", "M1", "M2", "M3", "M4"]
     job_names = ["T0", "T1", "T2", "T3", "T4", "T5", "T6"]
-    # print(f"{best_makespan=}")
-    # print(f"{best_permutation=}")
     create_and_show_gantt_fs(best_schedule, machine_names, job_names)
-    # print(f"{makespan_list=}")
 
 
 
