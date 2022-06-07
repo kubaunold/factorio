@@ -107,13 +107,16 @@ class FlowShop:
         return schedule
 
 def main():
-    m, n = 5, 7
+    m, n = 5, 20
     operation_times = read_operations(m, n)
     fs = FlowShop(m=m, n=n, operation_times=operation_times)
     
     import itertools
-    all_perms = list(itertools.permutations(list(i for i in range(n))))
-
+    all_perms = []
+    # all_perms = list(itertools.permutations(list(i for i in range(n))))
+    optim_perm = [3, 17,	15,	8,	9,	6,	5,	14,	16,	7,	11,	13,	18,	19,	1,	4,	2,	10,	20,	12]
+    optim_perm_idxs = [x-1 for x in optim_perm]
+    all_perms.append(optim_perm_idxs)
     best_makespan = inf
     best_permutation = []
     best_schedule = []
@@ -131,8 +134,8 @@ def main():
         
         # create_and_show_gantt_fs(schedule, machine_names, job_names)
 
-    machine_names = ["M0", "M1", "M2", "M3", "M4"]
-    job_names = ["T0", "T1", "T2", "T3", "T4", "T5", "T6"]
+        machine_names = get_machine_names(m)
+        job_names = get_task_names(n)
     create_and_show_gantt_fs(best_schedule, machine_names, job_names)
 
 

@@ -23,10 +23,10 @@ def main():
     # Probability of mutation
     p_mut = .07
     # Stopping number for generation
-    n_epoch = 100
+    n_epoch = 1000
 
 
-    m, n = 5, 20
+    m, n = 10, 50
     operation_times = read_operations(m, n)
     # Failure size
     failure_size = 0.03

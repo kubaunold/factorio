@@ -170,6 +170,9 @@ class GeneticFlowShop(FlowShop):
         """Run the algorithm for 'n_epoch' times"""
         for i in range(self.n_epoch):
             
+            if (i%500==0):
+                print(f"iter: {i}/{self.n_epoch}; {i/self.n_epoch*100}%")
+
             # Selecting parents for breeding
             self.__selection()
             

@@ -5,7 +5,7 @@ plots average results over generations and at shows the best permutation that ha
 
 import time
 from gfs import GeneticFlowShop
-from util import read_operations, average_of_list, who_is_the_best
+from util import get_machine_names, get_task_names, read_operations, average_of_list, who_is_the_best
 import matplotlib.pyplot as plt
 import os
 from gantt_fs import create_and_show_gantt_fs
@@ -13,16 +13,16 @@ from gantt_fs import create_and_show_gantt_fs
 
 def main():
     
-    n_iter = 5
+    n_iter = 1
     
     # Number of population
-    n_pop = 4
+    n_pop = 10
     # Probability of crossover
-    p_cross = .05
+    p_cross = 1.00
     # Probability of mutation
-    p_mut = .07
+    p_mut = 1.00
     # Stopping number for generation
-    n_epoch = 100
+    n_epoch = 10000
 
 
     m, n = 5, 20
@@ -86,8 +86,8 @@ def main():
         # show gantt diagram
         # best_schedule = gfs.get_schedule(single_best_permutation)
         best_schedule = gfs.get_schedule()
-        machine_names = ["M0", "M1", "M2", "M3", "M4"]
-        job_names = ["T0", "T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9", "T10", "T11", "T12", "T13", "T14", "T15", "T16", "T17", "T18", "T19"]
+        machine_names = get_machine_names(m)
+        job_names = get_task_names(n)
         create_and_show_gantt_fs(best_schedule, machine_names, job_names)
 
     else:
