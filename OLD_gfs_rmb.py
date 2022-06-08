@@ -45,7 +45,7 @@ def main():
     # Stopping number for generation
     n_epoch = 100
     # Number of machines and tasks
-    m, n = 3, 4
+    n, m = 4, 3
 
     # Read operation times
     operation_times = read_operations(m, n)

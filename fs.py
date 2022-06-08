@@ -107,7 +107,7 @@ class FlowShop:
         return schedule
 
 def main():
-    m, n = 5, 20
+    n, m = 20, 5
     operation_times = read_operations(m, n)
     fs = FlowShop(m=m, n=n, operation_times=operation_times)
     

@@ -19,17 +19,17 @@ def main():
     # Number of population
     n_pop = 4
     # Probability of crossover
-    p_cross = .05
+    p_cross = .90
     # Probability of mutation
-    p_mut = .07
+    p_mut = .70
     # Stopping number for generation
     n_epoch = 1000
 
 
-    m, n = 10, 50
+    n, m = 20, 5
     operation_times = read_operations(m, n)
     # Failure size
-    failure_size = 0.03
+    failure_size = 0.20
 
     # specific makespans for each epoch of every iteration
     best_makespans = []

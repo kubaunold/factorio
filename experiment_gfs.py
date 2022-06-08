@@ -13,19 +13,19 @@ from gantt_fs import create_and_show_gantt_fs
 
 def main():
     
-    n_iter = 1
+    n_iter = 3
     
     # Number of population
-    n_pop = 10
+    n_pop = 60
     # Probability of crossover
     p_cross = 1.00
     # Probability of mutation
     p_mut = 1.00
     # Stopping number for generation
-    n_epoch = 10000
+    n_epoch = 600
 
 
-    m, n = 5, 20
+    n, m = 20, 5
     operation_times = read_operations(m, n)
 
 

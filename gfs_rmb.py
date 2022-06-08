@@ -226,7 +226,7 @@ def main():
     # Stopping number for generation
     n_epoch = 100
     # Number of machines and tasks
-    m, n = 5, 7
+    n, m = 7, 5
     # Failure size
     failure_size = 0.03
     # Read operation times

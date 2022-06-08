@@ -233,7 +233,7 @@ if __name__ == "__main__":
     # Stopping number for generation
     n_epoch = 100
     # Number of machines and tasks
-    m, n = 5, 20
+    n, m = 20, 5
 
     # Read operation times
     operation_times = read_operations(m, n)
