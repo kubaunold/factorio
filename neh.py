@@ -10,6 +10,9 @@ DZIAŁANIE NEH'a
 
 """
 
+# comment
+
+
 Permutation = list[int]
 NEH_result = Permutation, int
 Operation_times = list[list[int]]
