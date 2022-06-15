@@ -18,7 +18,9 @@ def initialize_gantt(maquinas, ht):
     nmaq = len(maquinas)
 
     # Creación de los objetos del plot:
+    # plt.figure(figsize=(8,6), dpi=60)
     fig, gantt = plt.subplots()
+
 
     # Diccionario con parámetros:
     diagrama = {
@@ -97,7 +99,8 @@ def add_machinebreakdown(diagrama, breakdown:Breakdown):
     gantt.text( x=(breakdown.t0 + breakdown.breakdown_duration/2),
                 y=(hbar*imaq + hbar/2),
                 s=f"MB {breakdown.breakdown_duration}",
-                color='black')
+                color='black',
+                va='center', ha='center')
 
 def complete_gantt(diagrama, schedule, machine_names, task_names, breakdown=None):
     # Add subtasks:

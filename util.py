@@ -1,6 +1,6 @@
 def read_operations(n: int, m: int):
     durations = []
-    with open(f"test_data/operations_{m}_{n}.data", 'r') as handle:
+    with open(f"test_data/operations_{n}_{m}.data", 'r') as handle:
         lines = handle.readlines()
         for line in lines:
             machine_operations = map(int, line.split())

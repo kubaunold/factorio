@@ -13,7 +13,7 @@ from gantt_fs import create_and_show_gantt_fs
 
 def main():
     
-    n_iter = 3
+    n_iter = 1
     
     # Number of population
     n_pop = 60
@@ -25,8 +25,8 @@ def main():
     n_epoch = 600
 
 
-    n, m = 20, 5
-    operation_times = read_operations(m, n)
+    n, m = 7, 5
+    operation_times = read_operations(n, m)
 
 
     # specific makespans for each epoch of every iteration

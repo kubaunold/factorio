@@ -227,16 +227,16 @@ if __name__ == "__main__":
     # Number of population
     n_pop = 4
     # Probability of crossover
-    p_cross = 1.0
+    p_cross = 0.90
     # Probability of mutation
-    p_mut = 1.0
+    p_mut = 0.80
     # Stopping number for generation
     n_epoch = 100
     # Number of machines and tasks
-    n, m = 20, 5
+    n, m = 4, 3
 
     # Read operation times
-    operation_times = read_operations(m, n)
+    operation_times = read_operations(n, m)
 
     # Run single iteration
     gfs = GeneticFlowShop(  m, n, operation_times, 

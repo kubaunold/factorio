@@ -228,9 +228,9 @@ def main():
     # Number of machines and tasks
     n, m = 7, 5
     # Failure size
-    failure_size = 0.03
+    failure_size = 0.3
     # Read operation times
-    operation_times = read_operations(m, n)
+    operation_times = read_operations(n, m)
 
     # Run single iteration
     gfsrmb = GeneticFlowShopWithMachineBreakdown(
