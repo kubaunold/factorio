@@ -171,7 +171,7 @@ class GeneticFlowShop(FlowShop):
         for i in range(self.n_epoch):
             
             if (i%500==0):
-                print(f"iter: {i}/{self.n_epoch}; {i/self.n_epoch*100}%")
+                print(f"epoch: {i}/{self.n_epoch}; {i/self.n_epoch*100}%")
 
             # Selecting parents for breeding
             self.__selection()
