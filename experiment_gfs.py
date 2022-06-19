@@ -29,7 +29,7 @@ def main():
     n_epoch = 1000
 
 
-    n, m = 20, 5
+    n, m = 500, 20
     operation_times = read_operations(n, m)
 
 

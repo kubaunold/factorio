@@ -5,13 +5,14 @@
 # Fecha: Octubre 2020                                           #
 #################################################################
 
+from platform import machine
 import matplotlib.pyplot as plt
 import numpy as np
 import random
 
 from breakdown import Breakdown
 
-def initialize_gantt(maquinas, ht):
+def initialize_gantt(maquinas, ht, n, m):
     # Parámetros:
     hbar = 10
     tticks = 10
@@ -20,7 +21,7 @@ def initialize_gantt(maquinas, ht):
     # Creación de los objetos del plot:
     # plt.figure(figsize=(8,6), dpi=60)
     fig, gantt = plt.subplots()
-
+    fig.set_size_inches(18, 10)
 
     # Diccionario con parámetros:
     diagrama = {
@@ -34,9 +35,12 @@ def initialize_gantt(maquinas, ht):
     }
 
     # Etiquetas de los ejes:
-    gantt.set_xlabel("Time")
-    gantt.set_ylabel("Machines")
-
+    gantt.set_xlabel("Czas", fontsize=16)
+    gantt.set_ylabel("Maszyna", fontsize=16)
+    gantt.set_title(
+        f'Diagram Gantta dla {n=} {m=} ',
+        fontsize = 18,
+    )
     # Límites de los ejes:
     gantt.set_xlim(0, ht)
     gantt.set_ylim(nmaq*hbar, 0)
@@ -56,7 +60,7 @@ def initialize_gantt(maquinas, ht):
 
     return diagrama
 
-def add_subtask(diagrama, t0, d, maq, job_namesea, color=None):
+def add_subtask(diagrama, t0, d, maq, job_namesea, color=None, suspend_operation_names=False):
     """Function for adding tasks to the diagram"""
     maquinas = diagrama["maquinas"]
     hbar = diagrama["hbar"]
@@ -81,8 +85,9 @@ def add_subtask(diagrama, t0, d, maq, job_namesea, color=None):
     gantt.broken_barh([(t0, d)], (hbar*imaq, hbar),
                       facecolors=(color))
     # Posición del texto:
-    gantt.text(x=(t0 + d/2), y=(hbar*imaq + hbar/2),
-                  s=f"{job_namesea} ({d})", va='center', ha='center', color='white')
+    if not suspend_operation_names:
+        gantt.text( x=(t0 + d/2), y=(hbar*imaq + hbar/2),
+                    s=f"{job_namesea} ({d})", va='center', ha='center', color='white')
 
 def add_machinebreakdown(diagrama, breakdown:Breakdown):
     gantt = diagrama["ax"]
@@ -102,7 +107,7 @@ def add_machinebreakdown(diagrama, breakdown:Breakdown):
                 color='black',
                 va='center', ha='center')
 
-def complete_gantt(diagrama, schedule, machine_names, task_names, breakdown=None):
+def complete_gantt(diagrama, schedule, machine_names, task_names, breakdown=None, suspend_operation_names=False):
     # Add subtasks:
     for subtask in schedule:
         add_subtask(
@@ -110,7 +115,8 @@ def complete_gantt(diagrama, schedule, machine_names, task_names, breakdown=None
             subtask["t0"],
             subtask["d"],
             machine_names[subtask["i_machine"]],
-            task_names[subtask["i_task"]]
+            task_names[subtask["i_task"]],
+            suspend_operation_names=suspend_operation_names
         )
 
     # Add machine breakdown
@@ -120,7 +126,7 @@ def complete_gantt(diagrama, schedule, machine_names, task_names, breakdown=None
             breakdown,
         )
 
-def create_gantt_fs(schedule, machine_names, task_names, breakdown=None):
+def create_gantt_fs(schedule, machine_names, task_names, breakdown=None, suspend_operation_names=False):
     # Horizonte temporal:
     # ultima_subtask = schedule[-1]
     # ht = ultima_subtask["t0"] + ultima_subtask["d"]
@@ -130,17 +136,20 @@ def create_gantt_fs(schedule, machine_names, task_names, breakdown=None):
         end_of_task = task["t0"] + task["d"] 
         ht = max(ht, end_of_task)
 
+    n = len(task_names)
+    m = len(machine_names)
+
     # Creamos el diagrama de gantt:
-    diagrama = initialize_gantt(machine_names, int(ht))
+    diagrama = initialize_gantt(machine_names, int(ht), n, m)
 
     # Completamos el gantt:
-    complete_gantt(diagrama, schedule, machine_names, task_names, breakdown=breakdown)
+    complete_gantt(diagrama, schedule, machine_names, task_names, breakdown=breakdown, suspend_operation_names=suspend_operation_names)
 
     # Retornamos el diagrama:
     return diagrama
 
-def create_and_show_gantt_fs(schedule, machine_names, task_names, breakdown=None):
-    create_gantt_fs(schedule, machine_names, task_names, breakdown=breakdown)
+def create_and_show_gantt_fs(schedule, machine_names, task_names, breakdown=None, suspend_operation_names=False):
+    create_gantt_fs(schedule, machine_names, task_names, breakdown=breakdown, suspend_operation_names=suspend_operation_names)
     mostrar()
 
 def mostrar():

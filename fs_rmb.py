@@ -66,7 +66,7 @@ def main():
 
     n, m = 4, 3
     operation_times = read_operations(m, n)
-    failure_size = 0.03
+    failure_size = 0.1
     fs_rmb = FlowShopWithMachineBreakdown(m, n, operation_times, failure_size)
     # fs_rmb.plot_sample()
 
