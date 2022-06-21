@@ -108,7 +108,7 @@ class FlowShop:
 
 def main():
     n, m = 20, 5
-    operation_times = read_operations(m, n)
+    operation_times = read_operations(n, m)
     fs = FlowShop(m=m, n=n, operation_times=operation_times)
     
     import itertools
