@@ -32,7 +32,7 @@ def main():
     n_epoch = 1000
 
 
-    n, m = 200, 10
+    n, m = 100, 20
     operation_times = read_operations(n, m)
     # Failure size
     failure_size = 0.10
